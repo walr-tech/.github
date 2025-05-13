@@ -1,6 +1,6 @@
 # 🧬 Walr-Tech GitHub Organization
 
-Welcome to **`walr-tech`**, the central GitHub organization for all engineering efforts at Walr. This org contains the source code, infrastructure, and workflows powering our products, platforms, and internal tooling.
+Welcome to **`walr-tech`**, the central GitHub organization for all engineering efforts at Walr. This org contains the source code, infrastructure, and workflows powering our products, platform, and internal tooling.
 
 ---
 
