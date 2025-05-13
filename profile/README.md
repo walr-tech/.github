@@ -9,7 +9,7 @@ Welcome to **`walr-tech`**, the central GitHub organization for all engineering 
 This organization is used to:
 
 - Host application code and shared libraries
-- Manage infrastructure-as-code using Bicep and Terraform
+- Manage infrastructure-as-code using Bicep (and eventually Terraform)
 - Run CI/CD pipelines via GitHub Actions
 - Organize development teams and enforce code governance
 
@@ -43,5 +43,5 @@ Repositories may define the following deployment environments:
 
 - Get added via your Entra ID team group
 - Join relevant GitHub Teams
-- Use our starter repository template
-- Review the Developer Handbook and GitHub Best Practices
+- Speak to Platform Engineering about your repository or workflow requirements
+- Review the Developer and GitHub Best Practices Wiki
