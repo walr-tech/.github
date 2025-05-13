@@ -1,0 +1,49 @@
+name: Label New Repositories
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Runs every 10 minutes
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  label-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run script to find and label new repos
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          GH_ORG: walr-tech
+        run: |
+          pip install PyGithub
+          python <<EOF
+          import os
+          from github import Github
+          from datetime import datetime, timedelta, timezone
+
+          org_name = os.getenv("GH_ORG")
+          token = os.getenv("GH_TOKEN")
+
+          g = Github(token)
+          org = g.get_organization(org_name)
+
+          # Look for repos created in the last 10 minutes
+          now = datetime.now(timezone.utc)
+          ten_minutes_ago = now - timedelta(minutes=10)
+
+          for repo in org.get_repos():
+              if repo.created_at > ten_minutes_ago:
+                  print(f"New repo found: {repo.name}")
+                  topics = repo.get_topics()
+                  if "managed" not in topics:
+                      topics.append("managed")
+                      repo.replace_topics(topics)
+                      print(f" → 'managed' label added to {repo.name}")
+          EOF
