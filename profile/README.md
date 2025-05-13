@@ -1,41 +1,47 @@
-🧬 Walr-Tech GitHub Organization
-Welcome to walr-tech, the central GitHub organization for all engineering efforts at Walr. This org contains the source code, infrastructure, and workflows powering our products, platforms, and internal tooling.
+# 🧬 Walr-Tech GitHub Organization
 
-🧭 Purpose
+Welcome to **`walr-tech`**, the central GitHub organization for all engineering efforts at Walr. This org contains the source code, infrastructure, and workflows powering our products, platforms, and internal tooling.
+
+---
+
+## 🧭 Purpose
+
 This organization is used to:
 
-Host application code and shared libraries
+- Host application code and shared libraries
+- Manage infrastructure-as-code using Bicep and Terraform
+- Run CI/CD pipelines via GitHub Actions
+- Organize development teams and enforce code governance
 
-Manage infrastructure-as-code using Bicep and Terraform
+---
 
-Run CI/CD pipelines via GitHub Actions
+## 🏗️ Structure
 
-Organize development teams and enforce code governance
+- **Repositories** follow naming standards and include `CODEOWNERS`, branch protection, and standardized CI/CD workflows
+- **Teams** are synced from Azure Entra ID and structured by product domain (e.g. `team-voyager`, `platform-engineering`)
+- **Templates** are used for consistent project scaffolding
 
-🏗️ Structure
-Repositories follow naming standards and include CODEOWNERS, branch protection, and standardized CI/CD workflows
+---
 
-Teams are synced from Azure Entra ID and structured by product domain (e.g. team-voyager, platform-engineering)
+## 🔐 Access & Security
 
-Templates are used for consistent project scaffolding
+- Access is controlled via Entra ID groups synced to GitHub Teams
+- SSO and 2FA are enforced across all members
+- Public repositories are disabled by default
 
-🔐 Access & Security
-Access is controlled via Entra ID groups synced to GitHub Teams
+---
 
-SSO and 2FA are enforced across all members
+## 🚀 Environments
 
-Public repositories are disabled by default
-
-🚀 Environments
 Repositories may define the following deployment environments:
 
-dev, staging, production — each protected via GitHub Actions environment rules
+- `dev`, `staging`, `production` — each protected via GitHub Actions environment rules
 
-📥 Onboarding
-Get added via your Entra ID team group
+---
 
-Join relevant GitHub Teams
+## 📥 Onboarding
 
-Talk to Platform Engineering about your repository needs
-
-Review the Developer Wiki and GitHub Best Practices
+- Get added via your Entra ID team group
+- Join relevant GitHub Teams
+- Use our starter repository template
+- Review the Developer Handbook and GitHub Best Practices
