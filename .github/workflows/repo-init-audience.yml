@@ -1,0 +1,70 @@
+name: Bootstrap CODEOWNERS for audience-* repos
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # every 10 mins
+  workflow_dispatch:
+
+jobs:
+  codeowners-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install PyGithub
+        run: pip install PyGithub
+
+      - name: Bootstrap CODEOWNERS in new audience repos
+        env:
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+          GH_ORG: walr-tech
+        run: |
+          python <<EOF
+          import os
+          import re
+          from github import Github
+          from datetime import datetime, timedelta, timezone
+
+          token = os.getenv("GH_TOKEN")
+          org_name = os.getenv("GH_ORG")
+          g = Github(token)
+          org = g.get_organization(org_name)
+
+          # Time range to check
+          now = datetime.now(timezone.utc)
+          window_start = now - timedelta(minutes=10)
+
+          print(f"🔍 Checking for new audience-* repos created since {window_start.isoformat()}")
+
+          for repo in org.get_repos():
+              if not repo.name.startswith("audience-"):
+                  continue
+              if repo.created_at < window_start:
+                  continue
+
+              print(f"➡️ Found new repo: {repo.name}")
+
+              # Check if CODEOWNERS already exists
+              try:
+                  repo.get_contents(".github/CODEOWNERS", ref=repo.default_branch)
+                  print(f"⚠️  CODEOWNERS already exists in {repo.name}")
+                  continue
+              except:
+                  pass  # Not found — continue
+
+              # Create CODEOWNERS content
+              content = "* @walr-tech/platform-team\n"
+              try:
+                  repo.create_file(
+                      path=".github/CODEOWNERS",
+                      message="Add default CODEOWNERS file",
+                      content=content,
+                      branch=repo.default_branch
+                  )
+                  print(f"✅ CODEOWNERS created in {repo.name}")
+              except Exception as e:
+                  print(f"❌ Failed to create CODEOWNERS in {repo.name}: {e}")
+          EOF
