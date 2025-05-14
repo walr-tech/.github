@@ -1,102 +1,83 @@
-name: Repo Config Bootstrap
+name: Repository init for core repos
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/30 * * * *'  # every 30 mins
   workflow_dispatch:
 
 jobs:
-  configure-repos:
+  codeowners-bootstrap:
     runs-on: ubuntu-latest
-
+    outputs:
+      modified_count: ${{ steps.set-output.outputs.count }}
+      modified_repos: ${{ steps.set-output.outputs.repos }}
     steps:
-      - name: Setup Python
+      - name: Checkout .github repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      - name: Install PyGitHub
+      - name: Install PyGithub
         run: pip install PyGithub
 
-      - name: Run bootstrap script
+      - id: bootstrap
+        name: Bootstrap CODEOWNERS in core-* repos
         env:
           GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
           GH_ORG: walr-tech
         run: |
-          python <<EOF
           import os
           from github import Github
           from datetime import datetime, timedelta, timezone
 
-          token = os.environ["GH_TOKEN"]
-          org_name = os.environ["GH_ORG"]
-
+          token = os.getenv("GH_TOKEN")
+          org_name = os.getenv("GH_ORG")
           g = Github(token)
           org = g.get_organization(org_name)
+
+          # Read CODEOWNERS template
+          with open("templates/CODEOWNERS-core", "r") as f:
+              codeowners_template = f.read()
 
           now = datetime.now(timezone.utc)
           since = now - timedelta(minutes=10)
 
+          modified_repos = []
+
           for repo in org.get_repos():
+              if not repo.name.startswith("core-"):
+                  continue
               if repo.created_at < since:
                   continue
 
-              print(f"📦 Bootstrapping: {repo.name}")
+              print(f"➡️ Found new repo: {repo.name}")
 
-              # 1. Add "test" topic
-              topics = repo.get_topics()
-              if "test" not in topics:
-                  topics.append("test")
-                  repo.replace_topics(topics)
-
-              # 2. Create CODEOWNERS
-              codeowners_content = "* @your-org/platform-team\n"
               try:
-                  repo.create_file(
-                      path=".github/CODEOWNERS",
-                      message="Add CODEOWNERS",
-                      content=codeowners_content,
-                      branch="main"
-                  )
-                  print("✅ CODEOWNERS added")
+                  repo.get_contents(".github/CODEOWNERS-core", ref=repo.default_branch)
+                  print(f"⚠️  CODEOWNERS already exists in {repo.name}")
               except:
-                  print("⚠️ CODEOWNERS already exists")
+                  try:
+                      repo.create_file(
+                          path=".github/CODEOWNERS-core",
+                          message="Add CODEOWNERS from template",
+                          content=codeowners_template,
+                          branch=repo.default_branch
+                      )
+                      print(f"✅ CODEOWNERS created in {repo.name}")
+                      modified_repos.append(repo.name)
+                  except Exception as e:
+                      print(f"❌ Failed to add CODEOWNERS to {repo.name}: {e}")
 
-              # 3. Create README
-              readme_content = f"# {repo.name}\n\nThis is a new Walr repository.\n"
-              try:
-                  repo.create_file(
-                      path="README.md",
-                      message="Add README",
-                      content=readme_content,
-                      branch="main"
-                  )
-                  print("✅ README added")
-              except:
-                  print("⚠️ README already exists")
+          # Export modified repo list as output
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"count={len(modified_repos)}\n")
+              f.write(f"repos={','.join(modified_repos)}\n")
 
-              # 4. Create .gitignore
-              gitignore = "bin/\nobj/\n.env\n.vscode/\n"
-              try:
-                  repo.create_file(
-                      path=".gitignore",
-                      message="Add .gitignore",
-                      content=gitignore,
-                      branch="main"
-                  )
-                  print("✅ .gitignore added")
-              except:
-                  print("⚠️ .gitignore already exists")
-
-              # 5. Ensure default branch is 'main'
-              try:
-                  if repo.default_branch != "main":
-                      repo.edit(default_branch="main")
-                      print("🔁 Default branch set to main")
-              except Exception as e:
-                  print(f"❌ Could not set default branch: {e}")
-
-              # (Optional) TODO: Set branch protection rules here
-          EOF
+      - id: set-output
+        name: Set summary output
+        run: echo "count=${{ steps.bootstrap.outputs.count }}, repos=${{ steps.bootstrap.outputs.repos }}"
 
 
