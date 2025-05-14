@@ -62,7 +62,7 @@ jobs:
               except:
                   try:
                       repo.create_file(
-                          path=".github/CODEOWNERS-core",
+                          path=".github/CODEOWNERS",
                           message="Add CODEOWNERS from template",
                           content=codeowners_template,
                           branch=repo.default_branch
