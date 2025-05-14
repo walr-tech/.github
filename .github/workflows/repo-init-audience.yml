@@ -76,7 +76,7 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"count={len(modified_repos)}\n")
               f.write(f"repos={','.join(modified_repos)}\n")
-          EOF    
+          EOF
 
       - id: set-output
         name: Set summary output
