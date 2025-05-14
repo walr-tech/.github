@@ -1,4 +1,4 @@
-name: Bootstrap CODEOWNERS for audience-* repos
+name: Repository init for audience repos
 
 on:
   schedule:
