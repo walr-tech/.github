@@ -44,7 +44,7 @@ jobs:
               codeowners_template = f.read()
 
           now = datetime.now(timezone.utc)
-          since = now - timedelta(minutes=10)
+          since = now - timedelta(minutes=30)
 
           modified_repos = []
 
